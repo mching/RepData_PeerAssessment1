@@ -41,9 +41,15 @@ hist(total_steps_by_day$total_steps, main = "Distribution of Total Steps by Day"
 
 Calculate and report the mean and median of the total number of steps taken per day
 
+The mean total steps per day is calculated below.
+
 ```{r}
-mean_median_steps_by_day <- ddply(.data = dat, .variables = .(date), summarize, mean_steps = mean(steps, na.rm = T), median_steps = median(steps, na.rm = T))
-mean_median_steps_by_day
+mean(total_steps_by_day$total_steps, na.rm = T)
+```
+
+The median total steps per day is calculated below.
+```{r}
+median(total_steps_by_day$total_steps, na.rm = T)
 ```
 
 ## What is the average daily activity pattern?
