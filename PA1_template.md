@@ -1,3 +1,8 @@
+---
+output:
+  html_document:
+    keep_md: yes
+---
 # Reproducible Research: Peer Assessment 1
 
 
@@ -79,7 +84,7 @@ We can plot the result using the base graphics system.
 hist(total_steps_by_day$total_steps, main = "Distribution of Total Steps by Day", xlab = "Total Steps")
 ```
 
-![plot of chunk unnamed-chunk-5](./PA1_template_files/figure-html/unnamed-chunk-5.png) 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
 
 **Calculate and report the** mean **and** median **of the total number of steps taken per day**
 
@@ -129,7 +134,7 @@ Now we can create the time series plot.
 with(mean_steps_by_interval, plot(x = interval, y = mean_steps, main = "Mean Steps by Interval", ylab = "Mean Steps", xlab = "Interval", type = "l"))
 ```
 
-![plot of chunk unnamed-chunk-9](./PA1_template_files/figure-html/unnamed-chunk-9.png) 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
 
 **Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?**
 
@@ -167,27 +172,6 @@ To impute missing `steps` values by the median at the interval, we will have to 
 
 ```r
 library(Hmisc)
-```
-
-```
-## Loading required package: grid
-## Loading required package: lattice
-## Loading required package: survival
-## Loading required package: splines
-## Loading required package: Formula
-## 
-## Attaching package: 'Hmisc'
-## 
-## The following objects are masked from 'package:plyr':
-## 
-##     is.discrete, summarize
-## 
-## The following objects are masked from 'package:base':
-## 
-##     format.pval, round.POSIXt, trunc.POSIXt, units
-```
-
-```r
 dat2 <- ddply(.data = dat, .variables = .(interval), transform, steps.i = impute(steps))
 ```
 
@@ -215,7 +199,7 @@ head(total_steps_by_day)
 hist(total_steps_by_day$total_steps, main = "Distribution of Total Steps by Day (Imputed Data)", xlab = "Total Steps")
 ```
 
-![plot of chunk unnamed-chunk-13](./PA1_template_files/figure-html/unnamed-chunk-13.png) 
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13.png) 
 
 The mean and median total steps per day can likewise be calculated the same way as before. The **mean** total steps per day is calculated below.
 
@@ -285,4 +269,4 @@ library(ggplot2)
 ggplot(data=mean_steps_by_interval, aes(x=interval, y=mean_steps)) + geom_line() + facet_grid(weekday ~ .) + ggtitle("Weekend vs. Weekday Steps by Interval") + ylab("Number of Steps")
 ```
 
-![plot of chunk unnamed-chunk-18](./PA1_template_files/figure-html/unnamed-chunk-18.png) 
+![plot of chunk unnamed-chunk-18](figure/unnamed-chunk-18.png) 
