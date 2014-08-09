@@ -2,7 +2,7 @@
 
 
 ## Loading and preprocessing the data
-I used the dataset `activity.zip` that was contained in Dr. Peng's Github repository.
+I used the dataset `activity.zip` that was contained in Dr. Peng's Github repository. We can use the `unzip` function from the `utils` package to automate the unzipping of the file.
 ```{r}
 library(utils)
 unzip("activity.zip")
@@ -10,7 +10,6 @@ dat <- read.csv("activity.csv", na.strings = "NA")
 ```
 
 We can see three variables in the dataset, `steps`, `date`, and `interval`.
-
 ```{r}
 str(dat)
 ```
