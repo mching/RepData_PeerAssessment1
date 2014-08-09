@@ -26,7 +26,7 @@ summary(dat)
 
 **Make a histogram of the total number of steps taken each day  **
 
-One way to calculate the sum of the number of steps taken each day is to use the `ddply` function from the `plyr` package. We can obtain the total `steps` by `date` using the `summarize` argument.
+One way to calculate the sum of the number of steps taken each day is to use the `ddply` function from the `plyr` package. We can obtain the total `steps` by `date` using the `summarize` argument with the `sum` function.
 ```{r}
 library(plyr)
 total_steps_by_day <- ddply(.data = dat, .variables = .(date), summarize, total_steps = sum(steps, na.rm = T))
@@ -52,9 +52,9 @@ median(total_steps_by_day$total_steps, na.rm = T)
 ```
 
 ## What is the average daily activity pattern?
-**Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)**
+**Make a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)**
 
-First we need to average the steps taken by 5 minute interval during each day. To do this we can again use `ddply` from the `plyr` package, but instead group by `interval` instead of `date`.
+First we need to average the steps taken by 5 minute interval during each day. To do this we can again use `ddply` from the `plyr` package, but instead group by `interval` instead of `date` and use `mean` instead of `sum`.
 ```{r}
 mean_steps_by_interval <- ddply(.data = dat, .variables = .(interval), summarize, mean_steps = mean(steps, na.rm = T))
 head(mean_steps_by_interval)
@@ -81,16 +81,16 @@ sum(is.na(dat$steps))
 ```
 
 **Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.**  
-I decided to replace the missing `steps` values by using the median of `steps` for each 5-minute interval. For example, a missing `steps` value at interval 1200 will be replaced by the median of `steps` at all other days' 1200 intervals). 
+I decided to replace the missing `steps` values by using the median of `steps` for each 5-minute interval. For example, a missing `steps` value at interval 1200 will be replaced by the median of `steps` at all other days' 1200 intervals. 
 
 **Create a new dataset that is equal to the original dataset but with the missing data filled in.**  
-To do simple imputation we can use the `impute` function from the `Hmisc` package to replace the `NA` value by the median of the variable. [This post](http://stackoverflow.com/questions/9322773/how-to-replace-na-with-mean-by-subset-in-r-impute-with-plyr) was helpful. The default behavior of `impute` is to replace `NA` values by the variable's median per its [documentation](http://svitsrv25.epfl.ch/R-doc/library/Hmisc/html/impute.html). 
+To do simple imputation we can use the `impute` function from the `Hmisc` package to replace the `NA` value by the median of the variable. The default behavior of `impute` is to replace `NA` values by the variable's median per its [documentation](http://svitsrv25.epfl.ch/R-doc/library/Hmisc/html/impute.html). 
 
-To impute missing `steps` values by the median at the interval, we will have to split by `interval`, apply the `impute` function, and then combine. Again, this is something that `ddply` can help us with elegantly. 
+To impute missing `steps` values by the median at the interval, we will have to split by `interval`, apply the `impute` function, and then combine. Again, this is something that `ddply` can help us with elegantly. [This post](http://stackoverflow.com/questions/9322773/how-to-replace-na-with-mean-by-subset-in-r-impute-with-plyr) was helpful. 
 
 ```{r}
 library(Hmisc)
-dat2 <- ddply(.data = dat, .variables = .(interval), transform, steps = impute(steps))
+dat2 <- ddply(.data = dat, .variables = .(interval), transform, steps.i = impute(steps))
 ```
 
 **Make a histogram of the total number of steps taken each day and Calculate and report the** mean **and** median **total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?**  
@@ -99,6 +99,7 @@ The histogram can be made using the same code as before, replacing `dat` with `d
 
 ```{r}
 total_steps_by_day <- ddply(.data = dat2, .variables = .(date), plyr::summarize, total_steps = sum(steps, na.rm = T))
+head(total_steps_by_day)
 hist(total_steps_by_day$total_steps, main = "Distribution of Total Steps by Day (Imputed Data)", xlab = "Total Steps")
 ```
 
@@ -115,8 +116,34 @@ median(total_steps_by_day$total_steps, na.rm = T)
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
-**For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
+**For this part the `weekdays()` function may be of some help here. Use the dataset with the filled-in missing values for this part.**
 
-Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.**  
+**Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.**  
 
-**Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).**
+To help with this, I created a function called `is.weekday` that takes a single argument `x` that should be of class `Date` or `POSIXt`. If `x` is a weekday (Monday-Friday), it will return TRUE. If it is a weekend (Saturday or Sunday), it will return FALSE.
+```{r}
+is.weekday <- function(x) {
+  weekend_list <- c("Saturday", "Sunday")
+  if (weekdays(x) %in% weekend_list) {
+    return(FALSE)
+  } else {
+    return(TRUE)
+  } 
+}
+
+dat2$weekday <- sapply(dat2$date, is.weekday)
+dat2$weekday <- factor(dat2$weekday, labels = c("weekend", "weekday"))
+```
+**Make a panel plot containing a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).**
+
+We can recycle the code from the first time we made a plot like this but this time we need to average the steps taken by 5 minute interval during each day and also summarize by weekday versus weekend. To do this we can again use `ddply` from the `plyr` package, but instead group by `interval` and `weekday` instead of just `interval`. Again we have to specify that we want the `summarize` function from `plyr` (not `Hmisc`) by providing the argument `plyr::summarize`.
+```{r}
+mean_steps_by_interval <- ddply(.data = dat2, .variables = .(interval, weekday), plyr::summarize, mean_steps = mean(steps, na.rm = T))
+head(mean_steps_by_interval)
+```
+
+Now we can create the time series plot. This time we'll use the `ggplot` function from the `ggplot2` package to make the panel plot using facets.
+```{r}
+library(ggplot2)
+ggplot(data=mean_steps_by_interval, aes(x=interval, y=mean_steps)) + geom_line() + facet_grid(weekday ~ .) + ggtitle("Weekend vs. Weekday Steps by Interval") + ylab("Number of Steps")
+```
