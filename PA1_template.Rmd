@@ -2,19 +2,121 @@
 
 
 ## Loading and preprocessing the data
+I used the dataset `activity.zip` that was contained in Dr. Peng's Github repository. We can use the `unzip` function from the `utils` package to automate the unzipping of the file.
+```{r}
+library(utils)
+unzip("activity.zip")
+dat <- read.csv("activity.csv", na.strings = "NA")
+```
 
+We can see three variables in the dataset, `steps`, `date`, and `interval`.
+```{r}
+str(dat)
+```
 
+Date is a factor variable so we can change this to the `Date` class for more convenient calculations.
+
+```{r}
+dat$date <- as.Date(as.character(dat$date))
+str(dat$date)
+summary(dat)
+```
 
 ## What is mean total number of steps taken per day?
 
+**Make a histogram of the total number of steps taken each day  **
 
+One way to calculate the sum of the number of steps taken each day is to use the `ddply` function from the `plyr` package. We can obtain the total `steps` by `date` using the `summarize` argument.
+```{r}
+library(plyr)
+total_steps_by_day <- ddply(.data = dat, .variables = .(date), summarize, total_steps = sum(steps, na.rm = T))
+head(total_steps_by_day)
+```
+
+We can plot the result using the base graphics system.
+
+```{r}
+hist(total_steps_by_day$total_steps, main = "Distribution of Total Steps by Day", xlab = "Total Steps")
+```
+
+**Calculate and report the** mean **and** median **of the total number of steps taken per day**
+
+The mean total steps per day is calculated below.
+```{r}
+mean(total_steps_by_day$total_steps, na.rm = T)
+```
+
+The median total steps per day is calculated below.
+```{r}
+median(total_steps_by_day$total_steps, na.rm = T)
+```
 
 ## What is the average daily activity pattern?
+**Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)**
 
+First we need to average the steps taken by 5 minute interval during each day. To do this we can again use `ddply` from the `plyr` package, but instead group by `interval` instead of `date`.
+```{r}
+mean_steps_by_interval <- ddply(.data = dat, .variables = .(interval), summarize, mean_steps = mean(steps, na.rm = T))
+head(mean_steps_by_interval)
+```
 
+Now we can create the time series plot.
+```{r}
+with(mean_steps_by_interval, plot(x = interval, y = mean_steps, main = "Mean Steps by Interval", ylab = "Mean Steps", xlab = "Interval", type = "l"))
+```
+
+**Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?**
+```{r}
+mean_steps_by_interval$interval[which(mean_steps_by_interval$mean_steps == max(mean_steps_by_interval$mean_steps))]
+```
 
 ## Imputing missing values
 
+**Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.**
 
+**Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)**
+
+```{r}
+sum(is.na(dat$steps))
+```
+
+**Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.**  
+I decided to replace the missing `steps` values by using the median of `steps` for each 5-minute interval. For example, a missing `steps` value at interval 1200 will be replaced by the median of `steps` at all other days' 1200 intervals). 
+
+**Create a new dataset that is equal to the original dataset but with the missing data filled in.**  
+To do simple imputation we can use the `impute` function from the `Hmisc` package to replace the `NA` value by the median of the variable. [This post](http://stackoverflow.com/questions/9322773/how-to-replace-na-with-mean-by-subset-in-r-impute-with-plyr) was helpful. The default behavior of `impute` is to replace `NA` values by the variable's median per its [documentation](http://svitsrv25.epfl.ch/R-doc/library/Hmisc/html/impute.html). 
+
+To impute missing `steps` values by the median at the interval, we will have to split by `interval`, apply the `impute` function, and then combine. Again, this is something that `ddply` can help us with elegantly. 
+
+```{r}
+library(Hmisc)
+dat2 <- ddply(.data = dat, .variables = .(interval), transform, steps = impute(steps))
+```
+
+**Make a histogram of the total number of steps taken each day and Calculate and report the** mean **and** median **total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?**  
+
+The histogram can be made using the same code as before, replacing `dat` with `dat2`. Note the use of `plyr::summarize` replacing `summarize` in the `ddply` call. `Hmisc` has its own `summarize` function that will be called if `plyr::` is not specified. See [this post](http://www.ats.ucla.edu/stat/r/faq/referencing_objects.htm) for specifics.
+
+```{r}
+total_steps_by_day <- ddply(.data = dat2, .variables = .(date), plyr::summarize, total_steps = sum(steps, na.rm = T))
+hist(total_steps_by_day$total_steps, main = "Distribution of Total Steps by Day (Imputed Data)", xlab = "Total Steps")
+```
+
+The mean and median total steps per day can likewise be calculated the same way as before. The **mean** total steps per day is calculated below.
+
+```{r}
+mean(total_steps_by_day$total_steps, na.rm = T)
+```
+
+The **median** total steps per day is calculated below.
+
+```{r}
+median(total_steps_by_day$total_steps, na.rm = T)
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+**For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
+
+Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.**  
+
+**Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).**
