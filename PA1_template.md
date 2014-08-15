@@ -70,13 +70,7 @@ head(total_steps_by_day)
 ```
 
 ```
-##         date total_steps
-## 1 2012-10-01        1141
-## 2 2012-10-02         126
-## 3 2012-10-03       11352
-## 4 2012-10-04       12116
-## 5 2012-10-05       13294
-## 6 2012-10-06       15420
+## Error: object 'total_steps_by_day' not found
 ```
 
 We can plot the result using the base graphics system.
@@ -86,7 +80,9 @@ We can plot the result using the base graphics system.
 hist(total_steps_by_day$total_steps, main = "Distribution of Total Steps by Day", xlab = "Total Steps")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+```
+## Error: object 'total_steps_by_day' not found
+```
 
 **Calculate and report the** mean **and** median **of the total number of steps taken per day**
 
@@ -97,7 +93,7 @@ mean(total_steps_by_day$total_steps, na.rm = T)
 ```
 
 ```
-## [1] 9504
+## Error: object 'total_steps_by_day' not found
 ```
 
 The median total steps per day is calculated below.
@@ -107,7 +103,7 @@ median(total_steps_by_day$total_steps, na.rm = T)
 ```
 
 ```
-## [1] 10395
+## Error: object 'total_steps_by_day' not found
 ```
 
 ## What is the average daily activity pattern?
@@ -128,13 +124,7 @@ head(mean_steps_by_interval)
 ```
 
 ```
-##   interval weekday mean_steps
-## 1        0 weekend     0.0000
-## 2        0 weekday     2.3333
-## 3        5 weekend     0.0000
-## 4        5 weekday     0.4615
-## 5       10 weekend     0.0000
-## 6       10 weekday     0.1795
+## Error: object 'mean_steps_by_interval' not found
 ```
 
 Now we can create the time series plot.
@@ -143,7 +133,9 @@ Now we can create the time series plot.
 with(mean_steps_by_interval, plot(x = interval, y = mean_steps, main = "Mean Steps by Interval", ylab = "Mean Steps", xlab = "Interval", type = "l"))
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
+```
+## Error: object 'mean_steps_by_interval' not found
+```
 
 **Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?**
 
@@ -152,7 +144,7 @@ mean_steps_by_interval$interval[which(mean_steps_by_interval$mean_steps == max(m
 ```
 
 ```
-## [1] 835
+## Error: object 'mean_steps_by_interval' not found
 ```
 
 ## Imputing missing values
