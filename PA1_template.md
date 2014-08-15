@@ -52,19 +52,26 @@ summary(dat)
 
 ## What is mean total number of steps taken per day?
 
-**Make a histogram of the total number of steps taken each day  **
+**Make a histogram of the total number of steps taken each day**
 
 One way to calculate the sum of the number of steps taken each day is to use the `ddply` function from the `plyr` package. We can obtain the total `steps` by `date` using the `summarize` argument with the `sum` function.
 
 ```r
 library(plyr)
 total_steps_by_day <- ddply(.data = dat, .variables = .(date), summarize, total_steps = sum(steps, na.rm = T))
+```
+
+```
+## Error: argument "by" is missing, with no default
+```
+
+```r
 head(total_steps_by_day)
 ```
 
 ```
 ##         date total_steps
-## 1 2012-10-01           0
+## 1 2012-10-01        1141
 ## 2 2012-10-02         126
 ## 3 2012-10-03       11352
 ## 4 2012-10-04       12116
@@ -90,7 +97,7 @@ mean(total_steps_by_day$total_steps, na.rm = T)
 ```
 
 ```
-## [1] 9354
+## [1] 9504
 ```
 
 The median total steps per day is calculated below.
@@ -110,17 +117,24 @@ First we need to average the steps taken by 5 minute interval during each day. T
 
 ```r
 mean_steps_by_interval <- ddply(.data = dat, .variables = .(interval), summarize, mean_steps = mean(steps, na.rm = T))
+```
+
+```
+## Error: argument "by" is missing, with no default
+```
+
+```r
 head(mean_steps_by_interval)
 ```
 
 ```
-##   interval mean_steps
-## 1        0    1.71698
-## 2        5    0.33962
-## 3       10    0.13208
-## 4       15    0.15094
-## 5       20    0.07547
-## 6       25    2.09434
+##   interval weekday mean_steps
+## 1        0 weekend     0.0000
+## 2        0 weekday     2.3333
+## 3        5 weekend     0.0000
+## 4        5 weekday     0.4615
+## 5       10 weekend     0.0000
+## 6       10 weekday     0.1795
 ```
 
 Now we can create the time series plot.
@@ -176,13 +190,13 @@ The histogram can be made using the same code as before, replacing `dat` with `d
 
 
 ```r
-total_steps_by_day <- ddply(.data = dat2, .variables = .(date), plyr::summarize, total_steps = sum(steps, na.rm = T))
+total_steps_by_day <- ddply(.data = dat2, .variables = .(date), plyr::summarize, total_steps = sum(steps.i, na.rm = T))
 head(total_steps_by_day)
 ```
 
 ```
 ##         date total_steps
-## 1 2012-10-01           0
+## 1 2012-10-01        1141
 ## 2 2012-10-02         126
 ## 3 2012-10-03       11352
 ## 4 2012-10-04       12116
@@ -204,7 +218,7 @@ mean(total_steps_by_day$total_steps, na.rm = T)
 ```
 
 ```
-## [1] 9354
+## [1] 9504
 ```
 
 The **median** total steps per day is calculated below.

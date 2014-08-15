@@ -24,7 +24,7 @@ summary(dat)
 
 ## What is mean total number of steps taken per day?
 
-**Make a histogram of the total number of steps taken each day  **
+**Make a histogram of the total number of steps taken each day**
 
 One way to calculate the sum of the number of steps taken each day is to use the `ddply` function from the `plyr` package. We can obtain the total `steps` by `date` using the `summarize` argument with the `sum` function.
 ```{r}
@@ -98,7 +98,7 @@ dat2 <- ddply(.data = dat, .variables = .(interval), transform, steps.i = impute
 The histogram can be made using the same code as before, replacing `dat` with `dat2`. Note the use of `plyr::summarize` replacing `summarize` in the `ddply` call. `Hmisc` has its own `summarize` function that will be called if `plyr::` is not specified. See [this post](http://www.ats.ucla.edu/stat/r/faq/referencing_objects.htm) for specifics.
 
 ```{r}
-total_steps_by_day <- ddply(.data = dat2, .variables = .(date), plyr::summarize, total_steps = sum(steps, na.rm = T))
+total_steps_by_day <- ddply(.data = dat2, .variables = .(date), plyr::summarize, total_steps = sum(steps.i, na.rm = T))
 head(total_steps_by_day)
 hist(total_steps_by_day$total_steps, main = "Distribution of Total Steps by Day (Imputed Data)", xlab = "Total Steps")
 ```
